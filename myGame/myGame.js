@@ -25,7 +25,18 @@ var location;
 var hp = 3;
 var hpText;
 var hpTime = 500;
-
+var music;
+var start;
+var loop;
+var hit;
+var whenHit;
+var death;
+var gameOver;
+var reload;
+var jump;
+var timer;
+var loops;
+var crate;
 function preload() {
     game.load.image('sky', 'assets/darksky.png');
     game.load.image('ground', 'assets/platform.png');
@@ -35,17 +46,42 @@ function preload() {
     game.load.image('collector', 'assets/Chest.png');
     game.load.image('deposit', 'assets/portal.png');
     game.load.image('house', 'assets/House.png');
-    game.load.audio('music', 'assets/music.wav');
+    game.load.audio('music', 'assets/music.ogg');
+    game.load.audio('hit', 'assets/hitSound.ogg')
+    game.load.image('coodude', 'assets/deposit.png')
+    game.load.audio('death', 'assets/death.ogg')
+    game.load.audio('jump', 'assets/jump.ogg')
+    game.load.image('crate', 'assets/crate.png')
 }
 
 function create() {
-    //Music loop
+crate = game.add.group();    
+    var myCrate = new Object();
     
+    myCrate.create = game.add.sprite(500, 500, 'crate')
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    jump = game.add.audio('jump')
+    //Music loop
+    death = game.add.audio('death');
+    hit = game.add.audio('hit');
+    music = game.add.audio('music');
+    
+    //Music decode
+    music.play();
+    music.volume = 1;
     //Physics
     game.physics.startSystem(Phaser.Physics.ARCADE);
     //The sky
     game.add.sprite(0, 0, 'sky');
-
+    
     //the platforms group contains everything our character walks on
     platforms = game.add.group();
 
@@ -74,7 +110,7 @@ function create() {
      //Collector
      collector = game.add.sprite(10, game.world.height - 103, 'collector');
     
-   
+    crate = game.add.sprite(-300, 300, 'crate')
     //The player arrives :)
     player = game.add.sprite(32, game.world.height - 150, 'dude');
     
@@ -130,7 +166,7 @@ function create() {
         diamond.body.bounce = 0.7 * Math.random() * 0.2;
     }
 
-
+    
 
 }
 
@@ -161,16 +197,17 @@ function update() {
 
     // Here we create 12 evenly spaced apart stars
 
-    for (var i = 0; i < 12; i++) {
-        if (timing > 250 - score * 0.01) {
+    for (var i = 0; i < 18; i++) {
+        if (timing > 750 - score/10) {
             // Create stars in the stars group
-            var star = stars.create(i * 70, 0, 'star');
+            var star = stars.create(i * 50, 0, 'star');
             //Star gravity
             star.body.gravity.y = 10 * Math.random();
 
             //Give the stars random bounce values
             star.body.bounce.y = 10 * Math.random() + 2;
             timing = 0;
+            loops += 1;
         } {
             timing = timing + 1
         }
@@ -192,23 +229,26 @@ function update() {
     var hitPlatform = game.physics.arcade.collide(player, platforms);
     //Inputs
     cursors = game.input.keyboard.createCursorKeys();
+    
     //Reset the players velocity
     player.body.velocity.x = 0;
 
     if (cursors.left.isDown) {
         //Move to the left
-        player.body.velocity.x = -150 - score * 0.05;
+        player.body.velocity.x = -100 - score * 0.01;
 
         player.animations.play('left');
 
     }
     else if (cursors.right.isDown) {
         //Move to the right
-        player.body.velocity.x = 150 + score * 0.05;
+        player.body.velocity.x = 100 + score * 0.01;
 
         player.animations.play('right');
 
     }
+    
+    else if (cursors.down.isDown) {if (player.overlap(collector)) {}}
     else {
         //standing still
         player.animations.stop();
@@ -216,7 +256,7 @@ function update() {
     }
     // Allowing the player to jump while touching the ground
     if (cursors.up.isDown && player.body.touching.down && hitPlatform) {
-        player.body.velocity.y = -100;
+        player.body.velocity.y = -75; jump.play();
     }
 
     //Dont mind me. Just star physics
@@ -230,12 +270,12 @@ function update() {
     
     hpText.text = "HP: " + hp;
 
-    if (items > 999) {
-        items = 1000;
+    if (items > 99) {
+        items = 100;
     }
 
     if (player.overlap(collector)) {
-        items += 5;
+        items += 0.25;
     }
 
     if (items > 0) {
@@ -244,6 +284,9 @@ function update() {
         }
 
     }
+    loop += 1;
+    while (gameOver == true) {reload += 1}
+    if (reload == 500) {location.reload}
 }
 
 function collectStar(player, star) {
@@ -251,8 +294,18 @@ function collectStar(player, star) {
     //Removes the star from the screen
     hp -= 1;
     hpTime = 0;
-         
-     }
+    whenHit = 1;
+    if (hp > 0) {
+    hit.play();
+    }
+    else if (hp == 0) {death.play()
+; music.pause();}     }
+if (loops == 432) {music.play()}
 }
 
-if (score > 10000) {hp = 3}
+if (score > 10000) {hp += 3}
+
+
+    music.loop();
+
+
